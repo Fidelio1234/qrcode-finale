@@ -14,8 +14,24 @@ const licenseRoutes = require('./license-routes');
 const LicenseManager = require('./license-manager');
 
 const app = express();
-app.use(cors());
+// ✅ CONFIGURAZIONE CORS COMPLETA - SOSTITUISCI QUESTA PARTE
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://localhost:3000', 
+    'http://127.0.0.1:3000',
+    'https://127.0.0.1:3000',
+    'https://qrcode-finale.onrender.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+}));
+
 app.use(express.json());
+
+// ✅ AGGIUNGI ANCHE QUESTO PER PREFLIGHT REQUESTS
+app.options('*', cors());
 
 const FILE_PATH = './ordini.json';
 const MENU_FILE_PATH = './menu.json';
