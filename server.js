@@ -14,17 +14,8 @@ const licenseRoutes = require('./license-routes');
 const LicenseManager = require('./license-manager');
 
 const app = express();
-
-// ✅ CORS SEMPLICE MA EFFICACE
-app.use(cors({
-  origin: true,  // Permette tutti gli origin
-  credentials: true
-}));
-
+app.use(cors());
 app.use(express.json());
-
-// ✅ AGGIUNGI ANCHE QUESTO PER PREFLIGHT REQUESTS
-app.options('*', cors());
 
 const FILE_PATH = './ordini.json';
 const MENU_FILE_PATH = './menu.json';
