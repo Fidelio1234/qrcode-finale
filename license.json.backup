@@ -1,0 +1,25 @@
+{
+  "type": "ANNUAL",
+  "issueDate": "2025-10-20T22:49:53.334Z",
+  "expiryDate": "2026-10-20T22:49:53.334Z",
+  "licenseId": "ANNU_2JCBO96P_MGZQAA46",
+  "customer": {
+    "name": "ivan de mitri",
+    "email": "info@dmiservice.it",
+    "company": "DMI",
+    "phone": "339/1199015"
+  },
+  "activated": "2025-10-20T22:49:53.334Z",
+  "machineId": "MacBook-Air-di-Ivan.local",
+  "trial": true,
+  "paid": true,
+  "features": [
+    "full_access",
+    "priority_support",
+    "all_updates",
+    "backup",
+    "phone_support"
+  ],
+  "price": 499,
+  "signature": "525eb1c4d7bf3557252bb60d4761da9743bc3a48c5c3e64dc175863a93dd294a"
+}
