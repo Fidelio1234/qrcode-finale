@@ -936,7 +936,80 @@ app.get('/operatore', (req, res) => {
 
 
 
-
+// ✅ ENDPOINT ORDINA (PAGINA CLIENTI) - AGGIUNGI QUESTO
+app.get('/ordina', (req, res) => {
+  try {
+    const { tavolo } = req.query;
+    
+    if (!tavolo) {
+      return res.status(400).send('Numero tavolo mancante');
+    }
+    
+    console.log(`📱 Pagina ordine richiesta per tavolo: ${tavolo}`);
+    
+    // Leggi il menu
+    const menu = leggiFileSicuro(MENU_FILE_PATH);
+    
+    // Crea una pagina HTML semplice per gli ordini
+    const html = `
+    <!DOCTYPE html>
+    <html lang="it">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ordina - Tavolo ${tavolo} - Ristorante Bellavista</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+            .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .tavolo-info { background: #2c3e50; color: white; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+            .categoria { margin-bottom: 30px; }
+            .categoria h3 { color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 5px; }
+            .prodotto { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
+            .prodotto:hover { background: #f9f9f9; }
+            .nome { font-weight: bold; }
+            .prezzo { color: #27ae60; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Ristorante Bellavista</h1>
+                <div class="tavolo-info">
+                    <h2>Tavolo ${tavolo}</h2>
+                </div>
+            </div>
+            
+            <div id="menu">
+                ${menu.reduce((html, prodotto) => {
+                  if (!html.includes(`<h3>${prodotto.categoria}</h3>`)) {
+                    html += `<div class="categoria"><h3>${prodotto.categoria}</h3>`;
+                  }
+                  html += `
+                    <div class="prodotto">
+                      <span class="nome">${prodotto.nome}</span>
+                      <span class="prezzo">€ ${prodotto.prezzo}</span>
+                    </div>
+                  `;
+                  return html;
+                }, '')}
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px; color: #666;">
+                <p>Per ordinare, chiama il cameriere o usa l'app del personale</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+    
+    res.send(html);
+    
+  } catch (error) {
+    console.error('❌ Errore endpoint ordina:', error);
+    res.status(500).send('Errore interno del server');
+  }
+});
 
 
 // --- Gestione errori globale ---
