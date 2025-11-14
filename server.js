@@ -897,7 +897,42 @@ app.get('/', (req, res) => {
 
 
 
-
+// ✅ ENDPOINT OPERATORE - AGGIUNGI QUESTO
+app.get('/operatore', (req, res) => {
+  try {
+    const { tavolo } = req.query;
+    
+    if (!tavolo) {
+      return res.status(400).json({ error: 'Numero tavolo mancante' });
+    }
+    
+    console.log(`📋 Operatore richiesto per tavolo: ${tavolo}`);
+    
+    // Leggi ordini e menu
+    const ordini = leggiFileSicuro(FILE_PATH);
+    const menu = leggiFileSicuro(MENU_FILE_PATH);
+    const ordiniTavolo = ordini.filter(o => o.tavolo.toString() === tavolo && o.stato !== 'chiuso');
+    
+    // Calcola totale
+    const totale = ordiniTavolo.reduce((tot, ordine) => {
+      return tot + ordine.ordinazione.reduce((sum, item) => sum + (item.prezzo * item.quantità), 0);
+    }, 0);
+    
+    res.json({
+      success: true,
+      tavolo: tavolo,
+      ordini: ordiniTavolo,
+      menu: menu,
+      coperto: coperto,
+      totale: totale,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Errore endpoint operatore:', error);
+    res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
 
 
 
