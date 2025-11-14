@@ -868,6 +868,42 @@ app.post('/api/ordini/pulizia-forzata', (req, res) => {
   }
 });
 
+
+// ✅ HOME PAGE ENDPOINT - AGGIUNGI QUESTO
+app.get('/', (req, res) => {
+  res.json({
+    message: '🚀 Server QRCode Ristorante Bellavista - ONLINE!',
+    version: '2.0',
+    deployedOn: 'Render',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: '/api/health',
+      menu: '/api/menu', 
+      ordini: '/api/ordini',
+      tavoli_occupati: '/api/tavoli/occupati',
+      coperto: '/api/coperto',
+      nuova_ordine: '/api/ordina (POST)',
+      debug: '/api/debug/files'
+    },
+    license: {
+      status: 'ACTIVE',
+      type: 'TRIAL',
+      days_remaining: 15
+    }
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+
 // --- Gestione errori globale ---
 app.use((err, req, res, next) => {
   console.error('❌ Errore server:', err);
