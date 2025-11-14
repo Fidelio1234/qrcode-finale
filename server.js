@@ -1012,6 +1012,283 @@ app.get('/ordina', (req, res) => {
 });
 
 
+
+
+
+
+// ✅ ENDPOINT GESTIONE MENU HTML - AGGIUNGI QUESTO
+app.get('/gestione-menu', (req, res) => {
+  try {
+    console.log('📋 Pagina gestione menu richiesta');
+    
+    const html = `
+    <!DOCTYPE html>
+    <html lang="it">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Gestione Menu - Ristorante Bellavista</title>
+        <style>
+            body { 
+                font-family: Arial, sans-serif; 
+                margin: 0; 
+                padding: 20px; 
+                background: #f0f2f5; 
+            }
+            .container { 
+                max-width: 1200px; 
+                margin: 0 auto; 
+            }
+            .header { 
+                background: #2c3e50; 
+                color: white; 
+                padding: 20px; 
+                border-radius: 10px; 
+                margin-bottom: 20px; 
+                text-align: center;
+            }
+            .section { 
+                background: white; 
+                padding: 20px; 
+                border-radius: 10px; 
+                margin-bottom: 20px; 
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            }
+            .form-group { 
+                margin-bottom: 15px; 
+            }
+            .form-group label { 
+                display: block; 
+                margin-bottom: 5px; 
+                font-weight: bold; 
+            }
+            .form-group input, .form-group select { 
+                width: 100%; 
+                padding: 8px; 
+                border: 1px solid #ddd; 
+                border-radius: 4px; 
+                box-sizing: border-box;
+            }
+            .btn { 
+                padding: 10px 20px; 
+                background: #27ae60; 
+                color: white; 
+                border: none; 
+                border-radius: 5px; 
+                cursor: pointer; 
+                margin-right: 10px;
+            }
+            .btn-danger { 
+                background: #e74c3c; 
+            }
+            .menu-grid { 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+                gap: 15px; 
+                margin-top: 20px;
+            }
+            .prodotto-card { 
+                border: 1px solid #ddd; 
+                padding: 15px; 
+                border-radius: 8px; 
+                position: relative;
+            }
+            .prodotto-nome { 
+                font-weight: bold; 
+                font-size: 1.1em; 
+                margin-bottom: 5px; 
+            }
+            .prodotto-prezzo { 
+                color: #27ae60; 
+                font-size: 1.2em; 
+                margin-bottom: 5px; 
+            }
+            .prodotto-categoria { 
+                color: #666; 
+                font-style: italic; 
+            }
+            .azioni { 
+                position: absolute; 
+                top: 10px; 
+                right: 10px; 
+            }
+            .categoria-section { 
+                margin-bottom: 30px; 
+            }
+            .categoria-title { 
+                color: #2c3e50; 
+                border-bottom: 2px solid #2c3e50; 
+                padding-bottom: 5px; 
+                margin-bottom: 15px; 
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Gestione Menu - Ristorante Bellavista</h1>
+                <p>Aggiungi, modifica o elimina prodotti dal menu</p>
+            </div>
+            
+            <!-- FORM AGGIUNTA PRODOTTO -->
+            <div class="section">
+                <h2>Aggiungi Nuovo Prodotto</h2>
+                <form id="form-prodotto">
+                    <div class="form-group">
+                        <label for="nome">Nome Prodotto:</label>
+                        <input type="text" id="nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prezzo">Prezzo (€):</label>
+                        <input type="number" id="prezzo" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoria">Categoria:</label>
+                        <select id="categoria" required>
+                            <option value="">Seleziona categoria</option>
+                            <option value="Antipasti">Antipasti</option>
+                            <option value="Primi">Primi</option>
+                            <option value="Secondi">Secondi</option>
+                            <option value="Contorni">Contorni</option>
+                            <option value="Dolci">Dolci</option>
+                            <option value="Bevande">Bevande</option>
+                            <option value="Birre">Birre</option>
+                            <option value="Vini">Vini</option>
+                            <option value="Frutta">Frutta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="descrizione">Descrizione (opzionale):</label>
+                        <input type="text" id="descrizione">
+                    </div>
+                    <button type="submit" class="btn">Aggiungi Prodotto</button>
+                </form>
+            </div>
+            
+            <!-- LISTA PRODOTTI -->
+            <div class="section">
+                <h2>Menu Attuale</h2>
+                <div id="menu-container">
+                    <!-- I prodotti verranno caricati qui -->
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let menu = [];
+            
+            // Carica il menu dal backend
+            async function caricaMenu() {
+                try {
+                    const response = await fetch('/api/menu');
+                    menu = await response.json();
+                    mostraMenu();
+                } catch (error) {
+                    console.error('Errore caricamento menu:', error);
+                    alert('Errore nel caricamento del menu');
+                }
+            }
+            
+            // Mostra il menu organizzato per categorie
+            function mostraMenu() {
+                const container = document.getElementById('menu-container');
+                const categorie = [...new Set(menu.map(p => p.categoria))];
+                
+                container.innerHTML = categorie.map(categoria => {
+                    const prodottiCategoria = menu.filter(p => p.categoria === categoria);
+                    return \`
+                        <div class="categoria-section">
+                            <h3 class="categoria-title">\${categoria}</h3>
+                            <div class="menu-grid">
+                                \${prodottiCategoria.map(prodotto => \`
+                                    <div class="prodotto-card">
+                                        <div class="azioni">
+                                            <button class="btn btn-danger" onclick="eliminaProdotto(\${prodotto.id})">Elimina</button>
+                                        </div>
+                                        <div class="prodotto-nome">\${prodotto.nome}</div>
+                                        <div class="prodotto-prezzo">€ \${prodotto.prezzo}</div>
+                                        <div class="prodotto-categoria">\${prodotto.categoria}</div>
+                                        \${prodotto.descrizione ? '<div class="prodotto-descrizione">' + prodotto.descrizione + '</div>' : ''}
+                                    </div>
+                                \`).join('')}
+                            </div>
+                        </div>
+                    \`;
+                }).join('');
+            }
+            
+            // Aggiungi nuovo prodotto
+            document.getElementById('form-prodotto').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const nome = document.getElementById('nome').value;
+                const prezzo = parseFloat(document.getElementById('prezzo').value);
+                const categoria = document.getElementById('categoria').value;
+                const descrizione = document.getElementById('descrizione').value;
+                
+                try {
+                    const response = await fetch('/api/menu', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            nome: nome,
+                            prezzo: prezzo,
+                            categoria: categoria,
+                            descrizione: descrizione
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        alert('Prodotto aggiunto con successo!');
+                        document.getElementById('form-prodotto').reset();
+                        caricaMenu(); // Ricarica il menu
+                    } else {
+                        alert('Errore nell\'aggiunta del prodotto');
+                    }
+                } catch (error) {
+                    console.error('Errore:', error);
+                    alert('Errore di connessione');
+                }
+            });
+            
+            // Elimina prodotto
+            async function eliminaProdotto(id) {
+                if (confirm('Sei sicuro di voler eliminare questo prodotto?')) {
+                    try {
+                        const response = await fetch(\`/api/menu/\${id}\`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (response.ok) {
+                            alert('Prodotto eliminato con successo!');
+                            caricaMenu(); // Ricarica il menu
+                        } else {
+                            alert('Errore nell\'eliminazione del prodotto');
+                        }
+                    } catch (error) {
+                        console.error('Errore:', error);
+                        alert('Errore di connessione');
+                    }
+                }
+            }
+            
+            // Carica il menu all'avvio
+            caricaMenu();
+        </script>
+    </body>
+    </html>
+    `;
+    
+    res.send(html);
+    
+  } catch (error) {
+    console.error('❌ Errore pagina gestione menu:', error);
+    res.status(500).send('Errore interno del server');
+  }
+});
+
 // --- Gestione errori globale ---
 app.use((err, req, res, next) => {
   console.error('❌ Errore server:', err);
