@@ -1,19 +1,19 @@
 {
   "type": "TRIAL",
-  "issueDate": "2025-10-20T22:55:49.460Z",
-  "expiryDate": "2025-11-04T23:55:49.460Z",
-  "licenseId": "TRIAL_PJHS3TOU9",
+  "issueDate": "2025-11-14T17:46:32.073Z",
+  "expiryDate": "2025-11-29T17:46:32.073Z",
+  "licenseId": "TRIAL_PQFIOPNRQ",
   "customer": {
     "name": "Trial User",
     "email": "trial@ristorante.com",
     "company": "N/D",
     "phone": ""
   },
-  "activated": "2025-10-20T22:55:49.461Z",
+  "activated": "2025-11-14T17:46:32.075Z",
   "machineId": "MacBook-Air-di-Ivan.local",
   "trial": true,
   "paid": false,
   "features": [],
   "price": 0,
-  "signature": "9b12a3cf3bf7f2498dead1e204e87de535cc0810c5a95946f322ebc3995cbf55"
+  "signature": "5c161a5c8d1516aca4bf027c7e3ec4df2b15537705fe3c55f89ff2ada687bfc1"
 }
