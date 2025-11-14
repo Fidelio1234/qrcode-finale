@@ -1,0 +1,110 @@
+[
+  {
+    "nome": "Tortelloni ripieni ",
+    "prezzo": 17,
+    "categoria": "Primi",
+    "id": 1750365213047
+  },
+  {
+    "nome": "Salsiccia",
+    "prezzo": 8,
+    "categoria": "Secondi",
+    "id": 1750365276205
+  },
+  {
+    "nome": "Arrosto Misto",
+    "prezzo": 12,
+    "categoria": "Secondi",
+    "id": 1750365294779
+  },
+  {
+    "nome": "Ananas",
+    "prezzo": 5,
+    "categoria": "Frutta",
+    "id": 1750365320709
+  },
+  {
+    "nome": "Spumone",
+    "prezzo": 6,
+    "categoria": "Dolci",
+    "id": 1750447059577
+  },
+  {
+    "nome": "Pasticcio",
+    "prezzo": 2.5,
+    "categoria": "Dolci",
+    "id": 1750447088490
+  },
+  {
+    "nome": "Tortellini",
+    "prezzo": 11,
+    "categoria": "Primi",
+    "id": 1750708837240
+  },
+  {
+    "nome": "torta",
+    "prezzo": 26,
+    "categoria": "Dolci",
+    "id": 1750878995187
+  },
+  {
+    "nome": "parmigiana",
+    "prezzo": 12,
+    "categoria": "Primi",
+    "id": 1751644018725
+  },
+  {
+    "nome": "Nastro Azzurro",
+    "prezzo": 3,
+    "categoria": "Birre",
+    "id": 1760379483169
+  },
+  {
+    "nome": "Riso",
+    "prezzo": 8,
+    "categoria": "Primi",
+    "id": 1760383669752
+  },
+  {
+    "nome": "PESCA",
+    "prezzo": 3.8,
+    "categoria": "Frutta",
+    "id": 1760385977091
+  },
+  {
+    "nome": "Pasta ",
+    "prezzo": 12,
+    "categoria": "Primi",
+    "id": 1760387327297
+  },
+  {
+    "nome": "Capicollo",
+    "prezzo": 14,
+    "categoria": "Secondi",
+    "id": 1760389758015
+  },
+  {
+    "nome": "Tennent?s",
+    "prezzo": 4,
+    "categoria": "Birre",
+    "id": 1760725227913
+  },
+  {
+    "nome": "Peroni",
+    "prezzo": 3.5,
+    "categoria": "Birre",
+    "id": 1760881847049
+  },
+  {
+    "nome": "Moretti",
+    "prezzo": 3,
+    "categoria": "Birre",
+    "id": 1760881859555
+  },
+  {
+    "nome": "Linguine alle cozze",
+    "prezzo": 14,
+    "categoria": "Primi",
+    "id": 1760986410366
+  }
+]
