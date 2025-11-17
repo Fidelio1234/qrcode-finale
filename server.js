@@ -2542,7 +2542,7 @@ function pulisciOrdiniVecchi() {
 // ✅ FUNZIONE STAMPA ORDINE SENZA PREZZI
 function stampaOrdine(ordine) {
   return new Promise((resolve, reject) => {
-    const ipStampante = ordine.ipStampante || '192.168.1.100';
+    const ipStampante = ordine.ipStampante || '172.20.10.8';
     const device = new escpos.Network(ipStampante);
     const printer = new escpos.Printer(device);
 
@@ -2606,7 +2606,7 @@ function stampaOrdine(ordine) {
 // ✅ FUNZIONE STAMPA ORDINE SENZA PREZZI
 function stampaOrdine(ordine) {
   return new Promise((resolve, reject) => {
-    const ipStampante = ordine.ipStampante || '192.168.1.100';
+    const ipStampante = ordine.ipStampante || '172.20.10.8';
     const device = new escpos.Network(ipStampante);
     const printer = new escpos.Printer(device);
 
@@ -2663,7 +2663,7 @@ function stampaOrdine(ordine) {
 // ✅ FUNZIONE STAMPA TOTALE TAVOLO CON PREZZI - VERSIONE CORRETTA
 function stampaTotaleTavolo(ordiniTavolo, tavolo) {
   return new Promise((resolve, reject) => {
-    const ipStampante = ordiniTavolo[0]?.ipStampante || '192.168.1.100';
+    const ipStampante = ordiniTavolo[0]?.ipStampante || '172.20.10.8';
     const device = new escpos.Network(ipStampante);
     const printer = new escpos.Printer(device);
 
@@ -2793,6 +2793,15 @@ app.get('/api/health', (req, res) => {
 });
 
 
+// ✅ ENDPOINT KEEP-ALIVE SEMPLICE
+app.get('/api/keep-alive', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Server attivo',
+    timestamp: new Date().toLocaleString('it-IT')
+  });
+});
+
 
 // ✅ APPLICA CONTROLLO LICENZE A TUTTE LE ALTRE API
 app.use('/api', licenseCheck);
@@ -2809,6 +2818,15 @@ app.post('/api/coperto', (req, res) => {
   console.log('⚙️ Coperto aggiornato:', coperto);
   res.json({ success: true, coperto });
 });
+
+
+
+
+
+
+
+
+
 
 // --- Endpoint Ordini ---
 
