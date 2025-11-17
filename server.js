@@ -2792,16 +2792,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-
-// ✅ ENDPOINT KEEP-ALIVE SEMPLICE
 app.get('/api/keep-alive', (req, res) => {
   res.json({ 
     status: 'OK', 
-    message: 'Server attivo',
+    message: 'Servizio stampante attivo',
     timestamp: new Date().toLocaleString('it-IT')
   });
 });
-
 
 // ✅ APPLICA CONTROLLO LICENZE A TUTTE LE ALTRE API
 app.use('/api', licenseCheck);
