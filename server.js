@@ -408,47 +408,6 @@ function stampaTotaleTavolo(ordiniTavolo, tavolo) {
 
 
 
-// ✅ DEVE ESSERE PRESENTE QUESTO ENDPOINT
-app.post('/api/stampa-remota', async (req, res) => {
-  try {
-    const { ordine } = req.body;
-    console.log('🌐 ORDINE REMOTO RICEVUTO - Tavolo:', ordine.tavolo);
-    
-    // 1. SALVA L'ORDINE
-    let ordini = leggiFileSicuro(FILE_PATH);
-    ordine.id = Date.now();
-    ordine.timestamp = new Date().toISOString();
-    ordine.stato = 'in_attesa';
-    ordini.push(ordine);
-    scriviFileSicuro(FILE_PATH, ordini);
-    
-    // 2. PROVA STAMPA LOCALE
-    try {
-      const response = await fetch('http://172.20.10.2:3002/api/stampa-ordine', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ordine }),
-        timeout: 5000
-      });
-      
-      if (response.ok) {
-        console.log('✅ Stampato localmente!');
-        return res.json({ success: true, message: 'Ordine stampato!' });
-      }
-    } catch (error) {
-      console.log('📍 Stampante offline');
-    }
-    
-    // 3. ORDINE COMUNQUE SALVATO
-    res.json({ 
-      success: true, 
-      message: 'Ordine ricevuto! Verrà preparato.'
-    });
-    
-  } catch (error) {
-    res.json({ success: false, error: error.message });
-  }
-});
 
 
 
