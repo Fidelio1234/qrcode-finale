@@ -408,14 +408,13 @@ function stampaTotaleTavolo(ordiniTavolo, tavolo) {
 
 
 
-// ✅ AGGIUNGI QUESTO PRIMA DI "// ✅ AVVIO SERVER"
+// ✅ DEVE ESSERE PRESENTE QUESTO ENDPOINT
 app.post('/api/stampa-remota', async (req, res) => {
   try {
     const { ordine } = req.body;
-    
     console.log('🌐 ORDINE REMOTO RICEVUTO - Tavolo:', ordine.tavolo);
     
-    // 1. SALVA L'ORDINE NEL DATABASE
+    // 1. SALVA L'ORDINE
     let ordini = leggiFileSicuro(FILE_PATH);
     ordine.id = Date.now();
     ordine.timestamp = new Date().toISOString();
@@ -423,37 +422,31 @@ app.post('/api/stampa-remota', async (req, res) => {
     ordini.push(ordine);
     scriviFileSicuro(FILE_PATH, ordini);
     
-    // 2. INVIA ALLA STAMPANTE LOCALE DEL RISTORANTE
-    const IP_STAMPANTE = '172.20.10.2'; // IL PC DEL RISTORANTE
-    console.log('🔔 Invio a stampante locale:', IP_STAMPANTE);
-    
-    const response = await fetch(`http://${IP_STAMPANTE}:3002/api/stampa-ordine`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ordine }),
-      timeout: 10000
-    });
-    
-    if (response.ok) {
-      console.log('✅ Ordine stampato localmente!');
-      res.json({ 
-        success: true, 
-        message: 'Ordine stampato in cucina!',
-        id: ordine.id 
+    // 2. PROVA STAMPA LOCALE
+    try {
+      const response = await fetch('http://172.20.10.2:3002/api/stampa-ordine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ordine }),
+        timeout: 5000
       });
-    } else {
-      throw new Error(`Stampa fallita: ${response.status}`);
+      
+      if (response.ok) {
+        console.log('✅ Stampato localmente!');
+        return res.json({ success: true, message: 'Ordine stampato!' });
+      }
+    } catch (error) {
+      console.log('📍 Stampante offline');
     }
     
-  } catch (error) {
-    console.error('❌ Errore stampa remota:', error.message);
-    
-    // L'ORDINE È COMUNQUE SALVATO!
+    // 3. ORDINE COMUNQUE SALVATO
     res.json({ 
-      success: false, 
-      message: 'Ordine ricevuto! Stampante momentaneamente non disponibile.',
-      error: error.message
+      success: true, 
+      message: 'Ordine ricevuto! Verrà preparato.'
     });
+    
+  } catch (error) {
+    res.json({ success: false, error: error.message });
   }
 });
 
