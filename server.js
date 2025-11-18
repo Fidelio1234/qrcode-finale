@@ -394,6 +394,63 @@ function stampaTotaleTavolo(ordiniTavolo, tavolo) {
 }
 
 
+
+
+// ✅ AGGIUNGI QUESTO PRIMA DI "// ✅ AVVIO SERVER"
+app.post('/api/stampa-remota', async (req, res) => {
+  try {
+    const { ordine } = req.body;
+    
+    console.log('🌐 ORDINE REMOTO RICEVUTO - Tavolo:', ordine.tavolo);
+    
+    // 1. SALVA L'ORDINE NEL DATABASE
+    let ordini = leggiFileSicuro(FILE_PATH);
+    ordine.id = Date.now();
+    ordine.timestamp = new Date().toISOString();
+    ordine.stato = 'in_attesa';
+    ordini.push(ordine);
+    scriviFileSicuro(FILE_PATH, ordini);
+    
+    // 2. INVIA ALLA STAMPANTE LOCALE DEL RISTORANTE
+    const IP_STAMPANTE = '172.20.10.2'; // IL PC DEL RISTORANTE
+    console.log('🔔 Invio a stampante locale:', IP_STAMPANTE);
+    
+    const response = await fetch(`http://${IP_STAMPANTE}:3002/api/stampa-ordine`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ordine }),
+      timeout: 10000
+    });
+    
+    if (response.ok) {
+      console.log('✅ Ordine stampato localmente!');
+      res.json({ 
+        success: true, 
+        message: 'Ordine stampato in cucina!',
+        id: ordine.id 
+      });
+    } else {
+      throw new Error(`Stampa fallita: ${response.status}`);
+    }
+    
+  } catch (error) {
+    console.error('❌ Errore stampa remota:', error.message);
+    
+    // L'ORDINE È COMUNQUE SALVATO!
+    res.json({ 
+      success: false, 
+      message: 'Ordine ricevuto! Stampante momentaneamente non disponibile.',
+      error: error.message
+    });
+  }
+});
+
+
+
+
+
+
+
 // ✅ ROUTES LICENZE
 app.use('/api/license', licenseRoutes);
 
