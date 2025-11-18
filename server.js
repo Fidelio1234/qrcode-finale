@@ -13,7 +13,19 @@ const licenseRoutes = require('./license-routes');
 const LicenseManager = require('./license-manager');
 
 const app = express();
-app.use(cors());
+
+// ✅ CORS SPECIFICO PER VERCEL
+app.use(cors({
+  origin: [
+    'https://frontend-qrcode-psi.vercel.app',
+    'https://*.vercel.app',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 const FILE_PATH = './ordini.json';
@@ -422,6 +434,68 @@ app.get('/api/keep-alive', (req, res) => {
     timestamp: new Date().toLocaleString('it-IT')
   });
 });
+
+
+
+// ✅ ENDPOINT STAMPA REMOTA - PER ORDINI DA RETE ESTERNA
+app.post('/api/stampa-remota', async (req, res) => {
+  try {
+    const { ordine } = req.body;
+    console.log('🌐 ORDINE REMOTO RICEVUTO - Tavolo:', ordine.tavolo);
+    
+    // 1. SALVA L'ORDINE NEL DATABASE
+    let ordini = leggiFileSicuro(FILE_PATH);
+    ordine.id = Date.now();
+    ordine.timestamp = new Date().toISOString();
+    ordine.stato = 'in_attesa';
+    ordini.push(ordine);
+    scriviFileSicuro(FILE_PATH, ordini);
+    
+    // 2. PROVA A STAMPARE LOCALMENTE
+    try {
+      console.log('🔔 Tentativo connessione a stampante locale...');
+      const response = await fetch('http://172.20.10.2:3002/api/stampa-ordine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ordine }),
+        timeout: 5000
+      });
+      
+      if (response.ok) {
+        console.log('✅ Stampato localmente!');
+        return res.json({ 
+          success: true, 
+          message: 'Ordine stampato in cucina!',
+          id: ordine.id 
+        });
+      } else {
+        console.log('❌ Stampa fallita, status:', response.status);
+      }
+    } catch (localError) {
+      console.log('📍 Stampante locale non raggiungibile:', localError.message);
+    }
+    
+    // 3. ORDINE COMUNQUE SALVATO (STAMPANTE OFFLINE)
+    console.log('💾 Ordine salvato (stampante offline)');
+    res.json({ 
+      success: true, 
+      message: 'Ordine ricevuto! Verrà preparato al più presto.',
+      id: ordine.id
+    });
+    
+  } catch (error) {
+    console.error('❌ Errore grave:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Errore nel sistema ordini' 
+    });
+  }
+});
+
+
+
+
+
 
 // ✅ APPLICA CONTROLLO LICENZE A TUTTE LE ALTRE API
 app.use('/api', licenseCheck);
