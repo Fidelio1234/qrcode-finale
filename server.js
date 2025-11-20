@@ -239,7 +239,7 @@ function stampaOrdine(ordine) {
 
 
 // ✅ FUNZIONE STAMPA ORDINE SENZA PREZZI
-function stampaOrdine(ordine) {
+/*function stampaOrdine(ordine) {
   return new Promise((resolve, reject) => {
     const ipStampante = ordine.ipStampante || '172.20.10.8';
     const device = new escpos.Network(ipStampante);
@@ -293,6 +293,90 @@ function stampaOrdine(ordine) {
     });
   });
 }
+*/
+
+
+
+
+
+// ✅ FUNZIONE STAMPA ORDINE - MODIFICATA PER RENDER
+function stampaOrdine(ordine) {
+  return new Promise((resolve, reject) => {
+    const ipStampante = ordine.ipStampante || '172.20.10.8';
+    const device = new escpos.Network(ipStampante);
+    const printer = new escpos.Printer(device);
+
+    device.open(err => {
+      if (err) {
+        // ✅ MODIFICA: RISOLVI INVECE DI RIGETTARE!
+        console.error('❌ Stampante non raggiungibile da Render:', err.message);
+        console.log('📍 Ordine salvato ma non stampato - verrà stampato localmente');
+        return resolve(); // ⬅️ IMPORTANTE: resolve() invece di reject()
+      }
+      
+      console.log('🖨️ Stampa ordine SENZA prezzi per tavolo:', ordine.tavolo);
+      
+      printer
+        .font('a')
+        .align('ct')
+        .style('b')
+        .size(1, 1)
+        .text('RISTORANTE BELLAVISTA')
+        .text('----------------------')
+        .align('lt')
+        .style('normal')
+        .text(`TAVOLO: ${ordine.tavolo}`)
+        .size(0, 1)
+        .text(`DATA: ${new Date().toLocaleString()}`)
+        .size(1, 1)
+        .text('------------------------')
+        .text('ORDINE:')
+        .text('');
+      
+      // ✅ STAMPA SENZA PREZZI
+      ordine.ordinazione.forEach((item, index) => {
+        if (item.prodotto.includes('Coperto')) {
+          printer.text(`${item.prodotto}`);
+        } else {
+          printer.text(`${item.quantità} x ${item.prodotto}`);
+        }
+      });
+      
+      printer
+        .text('-----------------------')
+        .text('')
+        .text('')
+        .text('')
+        .cut()
+        .close(err => {
+          if (err) {
+            console.error('❌ Errore chiusura stampante:', err);
+            // ✅ ANCHE QUI: RISOLVI COMUNQUE
+            resolve();
+          } else {
+            console.log('✅ Stampa ordine completata per tavolo:', ordine.tavolo);
+            resolve();
+          }
+        });
+    });
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // ✅ FUNZIONE STAMPA TOTALE TAVOLO CON PREZZI - VERSIONE CORRETTA
@@ -574,7 +658,18 @@ app.get('/api/ordini/tavolo/:tavolo', (req, res) => {
   }
 });
 
-app.post('/api/ordina', (req, res) => {
+
+
+
+
+
+
+
+
+
+
+
+/*app.post('/api/ordina', (req, res) => {
   try {
     let ordini = leggiFileSicuro(FILE_PATH);
     const ordine = req.body;
@@ -622,6 +717,76 @@ app.post('/api/ordina', (req, res) => {
     res.status(500).json({ error: 'Errore interno del server' });
   }
 });
+
+*/
+
+
+
+app.post('/api/ordina', (req, res) => {
+  try {
+    let ordini = leggiFileSicuro(FILE_PATH);
+    const ordine = req.body;
+    
+    if (!ordine.tavolo || !ordine.ordinazione) {
+      return res.status(400).json({ error: 'Dati ordine incompleti' });
+    }
+    
+    ordine.id = Date.now();
+    ordine.stato = 'in_attesa';
+    ordine.timestamp = new Date().toISOString();
+    ordine.dataOra = new Date().toLocaleString('it-IT');
+    
+    console.log('📦 Nuovo ordine:', {
+      tavolo: ordine.tavolo,
+      items: ordine.ordinazione.length,
+      data: ordine.dataOra
+    });
+    
+    ordini.push(ordine);
+    
+    if (!scriviFileSicuro(FILE_PATH, ordini)) {
+      return res.status(500).json({ error: 'Errore salvataggio ordine' });
+    }
+    
+    occupaTavolo(ordine.tavolo);
+
+    // ✅ STAMPA ORDINE (ORA NON BLOCCA PIÙ SE FALLISCE)
+    stampaOrdine(ordine)
+      .then(() => {
+        console.log('✅ Processo stampa completato per tavolo:', ordine.tavolo);
+      })
+      .catch(err => {
+        // ✅ QUESTO NON SUCCEDERÀ PIÙ, MA METTIAMOLO COMUNQUE
+        console.log('📍 Stampa non riuscita, ma ordine salvato');
+      });
+    
+    // ✅ RISPONDI SUBITO AL FRONTEND
+    res.json({ 
+      message: 'Ordine ricevuto con successo!', 
+      printed: true,
+      id: ordine.id 
+    });
+    
+  } catch (error) {
+    console.error('❌ Errore /api/ordina:', error);
+    res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 app.post('/api/ordini/:id/evaso', (req, res) => {
   try {
@@ -692,6 +857,57 @@ app.delete('/api/ordini/tavolo/:tavolo', (req, res) => {
     res.status(500).json({ error: 'Errore interno del server' });
   }
 });
+
+
+
+
+
+
+
+// ✅ NEL TUO SERVER SU RENDER
+
+// GET - Ordini non stampati
+app.get('/api/ordini/non-stampati', (req, res) => {
+  try {
+    const ordini = leggiFileSicuro(FILE_PATH);
+    const nonStampati = ordini.filter(o => o.stato === 'in_attesa' && !o.stampato);
+    console.log(`📋 Richiesta ordini non stampati: ${nonStampati.length} trovati`);
+    res.json(nonStampati);
+  } catch (error) {
+    console.error('❌ Errore /api/ordini/non-stampati:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST - Marca come stampato
+app.post('/api/ordini/:id/stampato', (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    let ordini = leggiFileSicuro(FILE_PATH);
+    const ordine = ordini.find(o => o.id === id);
+    
+    if (ordine) {
+      ordine.stampato = true;
+      ordine.stampatoIl = new Date().toISOString();
+      scriviFileSicuro(FILE_PATH, ordini);
+      console.log('✅ Ordine marcato come stampato:', id);
+    }
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('❌ Errore /api/ordini/:id/stampato:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+
+
+
+
+
+
+
 
 // ✅ ENDPOINT PER STAMPA TOTALE TAVOLO
 app.post('/api/tavoli/:tavolo/stampa-totale', (req, res) => {
